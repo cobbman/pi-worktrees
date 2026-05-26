@@ -76,7 +76,7 @@ describe('cmdCreate resolution integration', () => {
     vi.spyOn(gitService, 'ensureExcluded').mockImplementation(() => {});
 
     vi.spyOn(gitService, 'git').mockImplementation((args: string[]) => {
-      if (args[0] === 'rev-parse') {
+      if (args[0] === 'show-ref') {
         throw new Error('branch does not exist');
       }
       return '';

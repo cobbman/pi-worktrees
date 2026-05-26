@@ -1,4 +1,4 @@
-import type { ExtensionCommandContext } from '@mariozechner/pi-coding-agent';
+import type { ExtensionCommandContext } from '@earendil-works/pi-coding-agent';
 import { basename, join } from 'path';
 import { ensureExcluded, git, isGitRepo, listWorktrees } from '../services/git.ts';
 import { resolveLogfilePath, runHook, runOnCreateHook, sanitizePathPart } from './shared.ts';
@@ -45,6 +45,13 @@ export async function cmdCreate(
       `Using generated branch '${branchName}' from branchNameGenerator (input: '${parsed.generatorInput}').`,
       'info'
     );
+  }
+
+  try {
+    git(['check-ref-format', '--branch', branchName], ctx.cwd);
+  } catch {
+    ctx.ui.notify(`Invalid branch name: ${branchName}`, 'error');
+    return;
   }
 
   if (!parsed.generate && parsed.showLegacyWarning) {
@@ -120,7 +127,7 @@ export async function cmdCreate(
   }
 
   try {
-    git(['rev-parse', '--verify', branchName], ctx.cwd);
+    git(['show-ref', '--verify', '--quiet', `refs/heads/${branchName}`], ctx.cwd);
     ctx.ui.notify(`Branch '${branchName}' already exists. Use a different name.`, 'error');
     return;
   } catch {

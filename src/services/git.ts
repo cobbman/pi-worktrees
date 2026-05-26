@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { appendFileSync, existsSync, readFileSync, statSync } from 'fs';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { expandTemplate } from './templates.ts';
@@ -19,17 +19,23 @@ export interface WorktreeInfo {
 }
 
 /**
- * Execute a git command and return stdout.
+ * Execute a git command without invoking a shell.
+ *
+ * Keep this as the only git subprocess helper. Every argument is passed as an
+ * argv element, so branch names and paths cannot be interpreted as shell code.
  */
 export function git(args: string[], cwd?: string): string {
   try {
-    return execSync(`git ${args.join(' ')}`, {
+    return execFileSync('git', args, {
       cwd,
       encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ['ignore', 'pipe', 'pipe'],
     }).trim();
   } catch (error) {
-    throw new Error(`git ${args[0]} failed: ${(error as Error).message}`);
+    const err = error as Error & { stderr?: Buffer | string };
+    const stderr = Buffer.isBuffer(err.stderr) ? err.stderr.toString('utf-8') : err.stderr;
+    const detail = stderr?.trim() || err.message;
+    throw new Error(`git ${args[0] ?? ''} failed: ${detail}`);
   }
 }
 

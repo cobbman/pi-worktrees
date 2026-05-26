@@ -45,7 +45,7 @@ describe('cmdCreate branch-first integration', () => {
     vi.spyOn(gitService, 'listWorktrees').mockReturnValue([]);
     vi.spyOn(gitService, 'ensureExcluded').mockImplementation(() => {});
     vi.spyOn(gitService, 'git').mockImplementation((args: string[]) => {
-      if (args[0] === 'rev-parse') {
+      if (args[0] === 'show-ref') {
         throw new Error('branch does not exist');
       }
 
