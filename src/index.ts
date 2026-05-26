@@ -1,11 +1,8 @@
 /**
- * Worktree Extension - Git worktree management for isolated workspaces
- *
- * Provides commands to create, list, and manage git worktrees for feature development.
- * Codifies the patterns from the using-git-worktrees skill into an interactive command.
+ * Secure Git worktree management for Pi Coding Agent.
  */
 
-import type { ExtensionFactory } from '@mariozechner/pi-coding-agent';
+import type { ExtensionFactory } from '@earendil-works/pi-coding-agent';
 import type { CmdHandler } from './types.ts';
 import { cmdCd } from './cmds/cmdCd.ts';
 import { cmdCreate } from './cmds/cmdCreate.ts';
@@ -38,45 +35,26 @@ Commands:
 Configuration (~/.pi/agent/pi-worktrees.config.json):
   {
     "worktrees": {
-      "github.com/org/repo": {
-        "worktreeRoot": "~/work/org",
-        "onCreate": ["mise install", "bun install"],
-        "onSwitch": "mise run dev:resume",
-        "onBeforeRemove": "bun test",
-        "branchNameGenerator": "pi -p 'branch name for $PI_WORKTREE_PROMPT' --model local/model",
+      "**": {
+        "worktreeRoot": "{{mainWorktree}}.worktrees",
+        "onCreate": "echo Created {{path}}"
       },
-      "github.com/org/*": {
-        "worktreeRoot": "~/work/org-other",
-        "onCreate": "make setup"
+      "github.com/org/repo": {
+        "worktreeRoot": "~/work/repo.worktrees",
+        "onCreate": "npm install",
+        "onSwitch": "pwd",
+        "onBeforeRemove": "git status --short",
+        "branchNameGenerator": "printf 'feature/%s' $PI_WORKTREE_PROMPT"
       }
     },
-    "matchingStrategy": "fail-on-tie",
-    "logfile": "/tmp/pi-worktree-{sessionId}-{name}.log",
-    "onCreateDisplayOutputMaxLines": 5,
-    "onCreateCmdDisplayPending": "[ ] {{cmd}}",
-    "onCreateCmdDisplaySuccess": "[x] {{cmd}}",
-    "onCreateCmdDisplayError": "[ ] {{cmd}} [ERROR]",
-    "onCreateCmdDisplayPendingColor": "dim",
-    "onCreateCmdDisplaySuccessColor": "success",
-    "onCreateCmdDisplayErrorColor": "error",
-    "worktree": {
-      "worktreeRoot": "~/.worktrees/{{project}}",
-      "onCreate": "mise setup"
-    }
+    "matchingStrategy": "fail-on-tie"
   }
 
-Pattern matching: exact URL > most-specific glob > fallback (worktree)
+Pattern matching: exact URL > most-specific glob > ** fallback
 Matching strategies: fail-on-tie | first-wins | last-wins
-
-Config note: parentDir is deprecated and supported as an alias for worktreeRoot.
-Naming note: default worktree name is slugify(branch); explicit '--name' takes precedence.
-Generator note: '--generate' is explicit opt-in and requires branchNameGenerator config.
-Generated branch output must be valid and is never used unless --generate is present.
-Migration note: legacy '/worktree create <feature-name>' is deprecated and now treats token as branch.
-Use '/worktree create feature/<name> --name <name>' to preserve old semantics.
 Hook vars: {{path}}, {{name}}, {{branch}}, {{project}}, {{mainWorktree}}
-Hooks: onCreate (new), onSwitch (existing), onBeforeRemove (pre-delete, non-zero blocks)
-Logfile vars: {sessionId} / {{sessionId}}, {name} / {{name}}, {timestamp} / {{timestamp}}
+Hooks: onCreate, onSwitch, onBeforeRemove
+Generated branch names require explicit --generate and must pass git check-ref-format.
 `.trim();
 
 const commands: Record<string, CmdHandler> = {

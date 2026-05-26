@@ -18,7 +18,9 @@ type MockStore = {
 
 type CreateConfigServiceOptions = Record<string, unknown>;
 
-const createConfigServiceMock = vi.fn();
+const { createConfigServiceMock } = vi.hoisted(() => ({
+  createConfigServiceMock: vi.fn(),
+}));
 
 vi.mock('@zenobius/pi-extension-config', () => {
   return {

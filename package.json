@@ -1,11 +1,7 @@
 {
-  "name": "@zenobius/pi-worktrees",
-  "version": "0.5.1",
-  "description": "Worktrees extension for Pi Coding Agent",
-  "author": {
-    "name": "Zenobius",
-    "email": "airtonix@users.noreply.github.com"
-  },
+  "name": "@cobbman/pi-worktrees",
+  "version": "0.1.0",
+  "description": "Secure git worktree management extension for Pi Coding Agent",
   "type": "module",
   "exports": {
     ".": {
@@ -15,10 +11,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:zenobi-us/pi-worktrees.git"
+    "url": "git+ssh://git@github.com/cobbman/pi-worktrees.git"
   },
+  "bugs": {
+    "url": "https://github.com/cobbman/pi-worktrees/issues"
+  },
+  "homepage": "https://github.com/cobbman/pi-worktrees#readme",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "lint": "eslint .",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test && npm run typecheck && npm run lint && npm run build"
   },
   "keywords": [
     "pi-package",
@@ -26,30 +34,34 @@
   ],
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE"
   ],
   "pi": {
     "extensions": [
       "./dist/index.js"
     ]
   },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@zenobius/pi-extension-config": "^0.2.0",
     "typebox": "^1.0.81"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "@mariozechner/pi-tui": "*"
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.2",
     "@eslint/js": "^9.39.1",
-    "@mariozechner/pi-coding-agent": "*",
-    "@mariozechner/pi-tui": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
     "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "8.47.0",
     "@typescript-eslint/parser": "8.47.0",
-    "bun-types": "latest",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "^5.1.3",
