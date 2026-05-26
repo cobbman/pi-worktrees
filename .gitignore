@@ -7,8 +7,4 @@ dist/
 coverage/
 .nyc_output/
 .eslintcache
-.bun/
-.bun.lockb
-
-!.memory/
-!.memory/**
+.memory/
