@@ -13,7 +13,9 @@ type MockStore = {
   events: { on: ReturnType<typeof vi.fn> };
 };
 
-const createConfigServiceMock = vi.fn();
+const { createConfigServiceMock } = vi.hoisted(() => ({
+  createConfigServiceMock: vi.fn(),
+}));
 
 vi.mock('@zenobius/pi-extension-config', () => ({
   createConfigService: createConfigServiceMock,
@@ -104,6 +106,25 @@ describe('config service integration', () => {
 
     expect(result.matchedPattern).toBe('**');
     expect(result.settings.onCreate).toBe('echo "Created {{path}}"');
+  });
+
+  it('reflects config changes after the service is created', async () => {
+    store = createMockStore({
+      worktrees: {
+        '**': { worktreeRoot: '/tmp/old.worktrees' },
+      },
+    });
+
+    createConfigServiceMock.mockImplementation(async () => store);
+
+    const service = await createPiWorktreeConfigService();
+    expect(service.worktrees.get('**')?.worktreeRoot).toBe('/tmp/old.worktrees');
+
+    store.config.worktrees = {
+      '**': { worktreeRoot: '/tmp/new.worktrees' },
+    };
+
+    expect(service.worktrees.get('**')?.worktreeRoot).toBe('/tmp/new.worktrees');
   });
 
   it('keeps onCreate values compatible with command-list normalization in command layer', async () => {
